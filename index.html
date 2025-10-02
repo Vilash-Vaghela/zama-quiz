@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zama Quiz - Futuristic</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #0a0f1a, #1d2636);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .quiz-container {
+      width: 90%;
+      max-width: 600px;
+      background: rgba(20, 25, 40, 0.95);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0px 0px 25px rgba(0, 200, 255, 0.3);
+      text-align: center;
+    }
+    .logo {
+      width: 120px;
+      margin-bottom: 15px;
+    }
+    h1 {
+      color: #00f6ff;
+      text-shadow: 0 0 15px #00f6ff;
+      font-size: 28px;
+    }
+    .progress-bar {
+      height: 12px;
+      background: #333;
+      border-radius: 6px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00f6ff, #00ffa1);
+      transition: width 0.3s ease;
+    }
+    .question {
+      font-size: 20px;
+      margin: 20px 0;
+    }
+    .answers button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      background: #1a2235;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .answers button:hover {
+      background: #00f6ff;
+      color: #000;
+      font-weight: bold;
+    }
+    .navigation {
+      margin-top: 15px;
+    }
+    .navigation button {
+      background: linear-gradient(90deg, #00f6ff, #00ffa1);
+      border: none;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .navigation button:hover {
+      transform: scale(1.05);
+    }
+    .result {
+      display: none;
+    }
+    .result h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #00ffa1;
+    }
+    .result img {
+      width: 100px;
+      margin: 15px 0;
+    }
+    .share-btn {
+      margin-top: 15px;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 25px;
+      background: #1da1f2;
+      color: #fff;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .share-btn:hover {
+      background: #0d8ddb;
+    }
+    .restart-btn {
+      margin-top: 15px;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 25px;
+      background: linear-gradient(90deg, #00ffa1, #00f6ff);
+      color: #000;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .restart-btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <img src="zama.jpg" alt="Zama Logo" class="logo">
+    <h1>Zama Creator Program Quiz</h1>
+    <div class="progress-bar"><div class="progress"></div></div>
+    <div class="quiz">
+      <div class="question"></div>
+      <div class="answers"></div>
+      <div class="navigation">
+        <button id="next-btn">Next</button>
+      </div>
+    </div>
+    <div class="result">
+      <img src="zama.jpg" alt="Zama Logo">
+      <h2>Your Score: <span id="score"></span>/10</h2>
+      <a id="share-btn" class="share-btn" target="_blank">Share on X</a>
+      <button class="restart-btn" onclick="restartQuiz()">Restart Quiz</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { q: "What is the Zama Creator Program about?", a: ["Creating AI models", "Creating content about FHE & Zama", "Building blockchains", "Investing in startups"], correct: 1 },
+      { q: "Which season of the Creator Program is ongoing?", a: ["Season 1", "Season 2", "Season 3", "Season 4"], correct: 2 },
+      { q: "What can creators earn by participating?", a: ["Crypto rewards", "Merchandise", "Exposure only", "NFTs"], correct: 0 },
+      { q: "Which platform rewards creators for content?", a: ["Zama Blog", "Zama Discord", "Zama Twitter", "Zama YouTube"], correct: 1 },
+      { q: "What technology is Zama pioneering?", a: ["Quantum Computing", "Fully Homomorphic Encryption (FHE)", "Blockchain Mining", "Cloud AI"], correct: 1 },
+      { q: "Where can you claim roles for rewards?", a: ["Discord", "Telegram", "LinkedIn", "Reddit"], correct: 0 },
+      { q: "Which role is easiest to claim?", a: ["Developer role", "Creator Program Access role", "Moderator role", "Validator role"], correct: 1 },
+      { q: "What type of content is rewarded?", a: ["High-quality content about Zama & FHE", "Memes only", "Random tweets", "None"], correct: 0 },
+      { q: "Which social platforms are mentioned for content?", a: ["Facebook & Instagram", "X (Twitter) & Farcaster", "TikTok & Snapchat", "LinkedIn & Medium"], correct: 1 },
+      { q: "What is the ultimate goal of the program?", a: ["Promote Zama & FHE awareness", "Sell NFTs", "Run ads", "Replace blockchains"], correct: 0 }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.querySelector(".question");
+    const answersEl = document.querySelector(".answers");
+    const nextBtn = document.getElementById("next-btn");
+    const progressEl = document.querySelector(".progress");
+    const resultEl = document.querySelector(".result");
+    const quizEl = document.querySelector(".quiz");
+    const scoreEl = document.getElementById("score");
+    const shareBtn = document.getElementById("share-btn");
+
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      questionEl.textContent = q.q;
+      answersEl.innerHTML = "";
+      q.a.forEach((option, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        btn.onclick = () => selectAnswer(index);
+        answersEl.appendChild(btn);
+      });
+      progressEl.style.width = ((currentQuestion) / questions.length) * 100 + "%";
+    }
+
+    function selectAnswer(index) {
+      if (index === questions[currentQuestion].correct) {
+        score++;
+      }
+      nextBtn.style.display = "inline-block";
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+        nextBtn.style.display = "none";
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      quizEl.style.display = "none";
+      resultEl.style.display = "block";
+      scoreEl.textContent = score;
+      progressEl.style.width = "100%";
+
+      // Add quiz link in share text
+      const quizLink = "https://yourquizlink.com"; // replace with real quiz link
+      shareBtn.href = `https://twitter.com/intent/tweet?text=I%20just%20scored%20${score}/10%20on%20the%20Zama%20Creator%20Program%20Quiz!%20🚀%20Try%20it%20here:%20${quizLink}%20%23Zama%20%23FHE`;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      resultEl.style.display = "none";
+      quizEl.style.display = "block";
+      loadQuestion();
+      nextBtn.style.display = "none";
+      progressEl.style.width = "0%";
+    }
+
+    loadQuestion();
+    nextBtn.style.display = "none";
+  </script>
+</body>
+</html>
+
